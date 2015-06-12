@@ -91,10 +91,8 @@ mkContext paramsStr =
      else aesonContext mobj
 
 mkProjContext :: Monad m => String -> String -> String -> MuType m
-mkProjContext projName paramsStr key =
-  let ctx = mkContext paramsStr
-  in if key == "projectName" then MuVariable projName
-     else ctx key
+mkProjContext projName _         "projName" = MuVariable projName
+mkProjContext _        paramsStr key        = mkContext paramsStr key
 
 -------------------------------------
 -- API
@@ -124,8 +122,8 @@ createProject name project paramsStr = do
   repoDir <- getLocalRepoDir
   createDirectoryIfMissing True name
   extract name $ repoDir ++ project ++ ".tar"
-  templatePaths <- find always (extension ==? templateExt) name
-  mapM_ (processTemplate name paramsStr) templatePaths
+  paths <- find always (extension ==? templateExt) name
+  mapM_ (processTemplate name paramsStr) paths
 
 -- Команда "new <file> <parameters>"
 -- 1) Найти в $HOME/.trurl/repo архив с именем file.hs.
